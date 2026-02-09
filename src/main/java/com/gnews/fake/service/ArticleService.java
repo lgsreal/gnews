@@ -73,7 +73,7 @@ public class ArticleService {
         }
 
         Comparator<Article> comparator = Comparator.comparing(Article::publishedAt).reversed();
-        if (sortBy == "relevance") {
+        if ("relevance".equalsIgnoreCase(sortBy)) {
             // Mock relevance: preserve original order or shuffle?
             // Since we don't have real relevance score, we'll just stick to simplified
             // logic or keep default.
