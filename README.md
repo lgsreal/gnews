@@ -49,7 +49,6 @@ erDiagram
 
     SOURCE ||--o{ ARTICLE : "source"
 ```
-
 ## � Endpoints Principais
 
 A API reproduz as seguintes rotas da GNews (V4):
