@@ -33,7 +33,7 @@ public class ArticleService {
         if (lang != null && !lang.isBlank()) {
             predicate = predicate.and(a -> a.lang().equalsIgnoreCase(lang));
         }
-        if (!country.isBlank()) {
+        if (country != null && !country.isBlank()) {
             predicate = predicate.and(a -> a.source().country().equalsIgnoreCase(country));
         }
         if (q != null && !q.isBlank()) {
