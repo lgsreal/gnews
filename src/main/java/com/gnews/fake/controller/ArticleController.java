@@ -49,7 +49,6 @@ public class ArticleController {
             @Parameter(description = "From date (ISO 8601)") @RequestParam(required = false) String from,
             @Parameter(description = "To date (ISO 8601)") @RequestParam(required = false) String to,
             @Parameter(description = "API Key") @RequestParam String apikey) {
-        System.out.println("apikey=" + apikey);
         return articleService.search(q, lang, country, sortby, from, to, page, max);
     }
 }
