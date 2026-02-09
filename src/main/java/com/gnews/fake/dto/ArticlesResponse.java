@@ -4,5 +4,5 @@ import java.util.List;
 
 public record ArticlesResponse(
         long totalArticles,
-        List<ArticleDto> articles) {
+        list<ArticleDto> articles) {
 }
