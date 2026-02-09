@@ -33,7 +33,7 @@ public class ArticleService {
         if (lang != null && !lang.isBlank()) {
             predicate = predicate.and(a -> a.lang().equalsIgnoreCase(lang));
         }
-        if (country != null && !country.isBlank()) {
+        if (!country.isBlank()) {
             predicate = predicate.and(a -> a.source().country().equalsIgnoreCase(country));
         }
         if (q != null && !q.isBlank()) {
@@ -73,7 +73,7 @@ public class ArticleService {
         }
 
         Comparator<Article> comparator = Comparator.comparing(Article::publishedAt).reversed();
-        if ("relevance".equalsIgnoreCase(sortBy)) {
+        if (sortBy == "relevance") {
             // Mock relevance: preserve original order or shuffle?
             // Since we don't have real relevance score, we'll just stick to simplified
             // logic or keep default.
