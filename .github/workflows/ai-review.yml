@@ -19,7 +19,7 @@ jobs:
 
       - name: Gemini Code Reviewer
         # Utilizando uma action compatível com modelos Google
-        uses: sturdy-dev/gemini-code-review-action@v1
+        uses: sturdy-dev/gemini-code-review-action@v0.10.0
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           model: 'gemini-2.0-flash'
