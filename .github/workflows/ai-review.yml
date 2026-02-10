@@ -22,26 +22,28 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install google-generativeai
+        run: pip install openai
 
-      - name: AI Reviewer (Direct Gemini)
+      - name: AI Reviewer (OpenAI-Compatible Gemini)
         env:
           GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python -c "
           import os
-          import google.generativeai as genai
+          from openai import OpenAI
           import subprocess
           import sys
 
           def run():
               try:
-                  genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-                  # Tentando usar o modelo Pro que e o mais estavel para essas tarefas
-                  model = genai.GenerativeModel('gemini-1.5-pro')
+                  # Configura cliente OpenAI apontando para o Google Gemini
+                  client = OpenAI(
+                      api_key=os.environ['GEMINI_API_KEY'],
+                      base_url='https://generativelanguage.googleapis.com/v1beta/openai/'
+                  )
                   
-                  # Pega o diff do PR (compara base com head)
+                  # Pega o diff do PR
                   diff = subprocess.check_output(['git', 'diff', 'origin/${{ github.base_ref }}...HEAD']).decode('utf-8')
                   
                   if not diff:
@@ -57,17 +59,23 @@ jobs:
                   DIFF:
                   {diff}
                   
-                  Responda de forma concisa em Português diretamente no comentário.
+                  Responda de forma concisa em Português diretamente no comentário do PR.
                   '''
                   
-                  response = model.generate_content(prompt)
-                  review_text = response.text
+                  response = client.chat.completions.create(
+                      model='gemini-1.5-flash',
+                      messages=[
+                          {'role': 'system', 'content': 'Você é um revisor de código experiente.'},
+                          {'role': 'user', 'content': prompt}
+                      ]
+                  )
                   
-                  # Salva o comentário em um arquivo para o gh CLI
+                  review_text = response.choices[0].message.content
+                  
                   with open('review.md', 'w') as f:
                       f.write('### 🤖 IA Code Review (Gemini)\n\n' + review_text)
                   
-                  # Posta o comentário no PR usando o gh CLI que ja vem no runner
+                  # Posta o comentário no PR
                   subprocess.run(['gh', 'pr', 'comment', str(${{ github.event.pull_request.number }}), '--body-file', 'review.md'], check=True)
                   print('Review posted successfully.')
               except Exception as e:
