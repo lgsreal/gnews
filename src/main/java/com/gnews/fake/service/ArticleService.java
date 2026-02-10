@@ -5,6 +5,7 @@ import com.gnews.fake.dto.ArticleDto;
 import com.gnews.fake.dto.ArticlesResponse;
 import com.gnews.fake.dto.SourceDto;
 import com.gnews.fake.repository.ArticleRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,10 +19,31 @@ import java.util.function.Predicate;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final JdbcTemplate jdbcTemplate;
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public ArticleService(ArticleRepository articleRepository) {
+    public ArticleService(ArticleRepository articleRepository, JdbcTemplate jdbcTemplate) {
         this.articleRepository = articleRepository;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    // VULNERÁVEL: SQL Injection por concatenação de string direta
+    public List<ArticleDto> findByTitle(String userInput) {
+        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
+        return jdbcTemplate.query(query, (rs, rowNum) -> new ArticleDto(
+                rs.getString("id"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getString("content"),
+                rs.getString("url"),
+                rs.getString("image"),
+                rs.getString("published_at"),
+                rs.getString("lang"),
+                new SourceDto(
+                        rs.getString("source_id"),
+                        rs.getString("source_name"),
+                        rs.getString("source_url"),
+                        rs.getString("source_country"))));
     }
 
     public ArticlesResponse getTopHeadlines(String category, String lang, String country, String q, int page, int max) {
