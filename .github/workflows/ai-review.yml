@@ -21,40 +21,35 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Pega o diff entre a base e o commit atual do PR de forma mais robusta
+          # Pega o diff
           BASE_SHA=${{ github.event.pull_request.base.sha }}
           HEAD_SHA=${{ github.event.pull_request.head.sha }}
           
-          echo "Comparing $BASE_SHA with $HEAD_SHA"
-          
-          # Garante que temos a base
           git fetch origin $BASE_SHA --depth=1
-          
           DIFF=$(git diff $BASE_SHA $HEAD_SHA | head -c 50000)
           
           if [ -z "$DIFF" ]; then
-            echo "No changes found between $BASE_SHA and $HEAD_SHA."
-            # Tenta um diff simples se o acima falhar
-            DIFF=$(git diff HEAD~1 HEAD | head -c 50000)
+             DIFF=$(git diff HEAD~1 HEAD | head -c 50000)
           fi
           
           if [ -z "$DIFF" ]; then
-             echo "Still no changes found. Exiting."
-             exit 0
+            echo "No changes found."
+            exit 0
           fi
 
-          # Prepara o prompt
+          # Prompt
           PROMPT="Aja como um Engenheiro de Segurança Sênior (DevSecOps). Analise o diff deste Pull Request em Português buscando vulnerabilidades OWASP (especialmente SQL Injection), code smells e melhores práticas. Responda de forma concisa.\n\nDIFF:\n$DIFF"
           
+          # Payload
           echo '{"contents": [{"parts": [{"text": ""}]}]}' > payload.json
           jq --arg txt "$PROMPT" '.contents[0].parts[0].text = $txt' payload.json > final_payload.json
 
-          # Chama a API do Gemini
-          RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY" \
+          # Chama a API do Gemini (v1beta com gemini-1.5-flash-8b)
+          RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=$GEMINI_API_KEY" \
             -H 'Content-Type: application/json' \
             -d @final_payload.json)
 
-          # Extrai o texto da resposta
+          # Extrai texto
           REVIEW_TEXT=$(echo $RESPONSE | jq -r '.candidates[0].content.parts[0].text')
 
           if [ "$REVIEW_TEXT" == "null" ] || [ -z "$REVIEW_TEXT" ]; then
@@ -63,10 +58,8 @@ jobs:
             exit 1
           fi
 
-          # Salva o comentário
+          # Salva e posta
           echo "### 🤖 IA Code Review (Gemini)" > review.md
           echo "" >> review.md
           echo "$REVIEW_TEXT" >> review.md
-
-          # Posta no PR
           gh pr comment ${{ github.event.pull_request.number }} --body-file review.md
