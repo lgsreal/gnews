@@ -9,23 +9,63 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # Necessário para comentar no PR
+      pull-requests: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: AI Reviewer (Gemini)
-        uses: sturdy-dev/gemini-code-review-action@v0.6.1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install google-generativeai
+
+      - name: AI Reviewer (Direct Gemini)
+        env:
           GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          model: "gemini-1.5-flash"
-          custom_prompt: |
-            Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
-            Analise o DIFF deste Pull Request buscando:
-            1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
-            2. Code Smells e complexidade ciclomática desnecessária.
-            3. Aderência às melhores práticas de Java 25 e Spring Boot.
-            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado em Português.
+        run: |
+          python -c "
+          import os
+          import google.generativeai as genai
+          import subprocess
+
+          def run():
+              genai.configure(api_key=os.environ['GEMINI_API_KEY'])
+              model = genai.GenerativeModel('gemini-1.5-flash')
+              
+              # Pega o diff do PR
+              diff = subprocess.check_output(['git', 'diff', 'origin/${{ github.base_ref }}...HEAD']).decode('utf-8')
+              
+              if not diff:
+                  print('No changes found.')
+                  return
+
+              prompt = f'''Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
+              Analise o DIFF deste Pull Request em Português buscando:
+              1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
+              2. Code Smells e melhorias de código.
+              3. Melhores práticas de Java 25 e Spring Boot.
+
+              DIFF:
+              {diff}
+              
+              Responda de forma concisa em Português.
+              '''
+              
+              response = model.generate_content(prompt)
+              review_text = response.text
+              
+              # Salva o comentário em um arquivo para o gh CLI
+              with open('review.md', 'w') as f:
+                  f.write('### 🤖 IA Code Review (Gemini)\n\n' + review_text)
+              
+              # Posta o comentário no PR
+              subprocess.run(['gh', 'pr', 'comment', str(${{ github.event.pull_request.number }}), '--body-file', 'review.md'], check=True)
+
+          run()
+          "
