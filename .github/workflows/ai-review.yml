@@ -1,39 +1,41 @@
 name: AI Code Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
 
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
+permissions: write-all
 
 jobs:
-  review:
+  gemini-code-review:
     runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/gemini-review')
     steps:
+      - name: PR Info
+        run: |
+          echo "Comment: ${{ github.event.comment.body }}"
+          echo "Issue Number: ${{ github.event.issue.number }}"
+          echo "Repository: ${{ github.repository }}"
+
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Gemini AI Code Review
-        uses: legiaquan/code-review-action@main
+      - name: Get PR Details
+        id: pr
+        run: |
+          PR_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.issue.number }})
+          echo "head_sha=$(echo $PR_JSON | jq -r .head.sha)" >> $GITHUB_OUTPUT
+          echo "base_sha=$(echo $PR_JSON | jq -r .base.sha)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: truongnh1992/gemini-ai-code-reviewer@main
         with:
-          provider: 'gemini'
-          api_key: ${{ secrets.GEMINI_API_KEY }}
-          pr_number: ${{ github.event.pull_request.number }}
-          review_level: 'file'
-          include_globs: '**/*.java,**/*.xml,**/*.yml,src/**/*.java'
-          exclude_globs: '**/*.md,**/*.txt,**/package-lock.json'
-          rules: |
-            Responda sempre em Português.
-            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
-            Analise o DIFF deste Pull Request buscando:
-            1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
-            2. Code Smells e complexidade ciclomática desnecessária.
-            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
-            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-pro # Optional, default is `gemini-2.5-flash`
+          EXCLUDE: "*.md,*.txt,package-lock.json,*.yml,*.yaml"
