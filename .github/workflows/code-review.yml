@@ -1,0 +1,23 @@
+name: Gemini Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Gemini Code Reviewer
+        uses: google-github-actions/gemini-code-review@v1
+        with:
+          model: "gemini-2.5-flash"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          review_comment_message: "Gemini 2.5 Flash Review: Please check the following suggestions."
