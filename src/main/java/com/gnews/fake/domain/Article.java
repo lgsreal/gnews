@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 public record Article(
         String id,
         String title,
-        String description,
+        String descricao,
         String content,
         String url,
-        String image,
+        String img,
         LocalDateTime publishedAt,
         String lang,
         String category, // Internal use for filtering
-        Source source) {
+        Source src) {
 }
