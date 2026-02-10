@@ -1,4 +1,4 @@
-name: Gemini AI Code Review
+name: AI Code Review
 
 on:
   pull_request:
@@ -17,116 +17,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Dependencies
-        run: pip install requests google-generativeai -q
-
-      - name: Get PR Diff
-        id: diff
-        run: |
-          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-branch
-          git diff origin/main...pr-branch > /tmp/diff.patch || git diff HEAD > /tmp/diff.patch
-          echo "completed=true" >> $GITHUB_OUTPUT
-
-      - name: Gemini Code Review
+      - name: AI Reviewer
+        uses: anc95/ChatGPT-CodeReview@main
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          python3 << 'REVIEW_SCRIPT'
-          import os
-          import json
-          import requests
-          
-          api_key = os.getenv('GEMINI_API_KEY')
-          if not api_key:
-              print("::warning::GEMINI_API_KEY not configured")
-              exit(0)
-          
-          # Read diff
-          with open('/tmp/diff.patch', 'r') as f:
-              diff_content = f.read()[:15000]  # Limit to 15KB
-          
-          if not diff_content.strip():
-              print("No changes to review")
-              with open('/tmp/review.txt', 'w') as f:
-                  f.write("✅ No changes detected in this PR.")
-              exit(0)
-          
-          prompt = f"""Você é um Engenheiro de Segurança Sênior (DevSecOps) especializado em Java e Spring Boot.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-Analise este DIFF de Pull Request e identifique:
+          # 🔑 Chave do proxy (OpenRouter / LiteLLM / etc.)
+          OPENAI_API_KEY: ${{ secrets.AI_API_KEY }}
 
-1. **VULNERABILIDADES CRÍTICAS** (SQL Injection, RCE, Deserialization, etc.)
-2. **PROBLEMAS DE SEGURANÇA** (Hardcoded secrets, XSS, CORS inseguro, etc.)
-3. **CODE SMELLS** (God methods, dead code, duplicação, etc.)
-4. **MELHORES PRÁTICAS** (Java 21+, Spring Boot 3.4)
+          # 🌐 Endpoint do proxy (exemplo OpenRouter)
+          OPENAI_API_BASE: https://openrouter.ai/api/v1
 
-Responda em **Português** com severidade (🔴 CRÍTICO / 🟠 ALTO / 🟡 MÉDIO / 🟢 BAIXO).
+          # 🤖 Modelo Gemini
+          MODEL: google/gemini-1.5-pro
 
-DIFF:
-```diff
-{diff_content}
-```
+          LANGUAGE: Portuguese
 
-Forneça:
-- Resumo executivo
-- Lista de issues por severidade
-- Código corrigido para problemas críticos"""
-          
-          url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
-          
-          headers = {'Content-Type': 'application/json'}
-          payload = {
-              'contents': [{
-                  'parts': [{
-                      'text': prompt
-                  }]
-              }],
-              'generationConfig': {
-                  'maxOutputTokens': 2000
-              }
-          }
-          
-          response = requests.post(url, json=payload, headers=headers, timeout=30)
-          
-          if response.status_code == 200:
-              data = response.json()
-              if 'candidates' in data and data['candidates']:
-                  review = data['candidates'][0]['content']['parts'][0]['text']
-                  with open('/tmp/review.txt', 'w') as f:
-                      f.write(review)
-                  print("✅ Review generated successfully")
-              else:
-                  with open('/tmp/review.txt', 'w') as f:
-                      f.write("⚠️ No review generated - empty response")
-          else:
-              print(f"::error::API Error {response.status_code}: {response.text}")
-              with open('/tmp/review.txt', 'w') as f:
-                  f.write(f"❌ Error generating review: {response.status_code}")
-          REVIEW_SCRIPT
-
-      - name: Post Review Comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            
-            let comment = '## 🤖 AI Code Review (Gemini 2.0 Flash)\n\n';
-            
-            try {
-              const review = fs.readFileSync('/tmp/review.txt', 'utf8');
-              comment += review;
-            } catch (err) {
-              comment += '⚠️ Failed to generate review. Please check if GEMINI_API_KEY secret is configured.';
-            }
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+          PROMPT: |
+            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
+            Analise o DIFF deste Pull Request buscando:
+            1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
+            2. Code Smells e complexidade ciclomática desnecessária.
+            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
+            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado.
