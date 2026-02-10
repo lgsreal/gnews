@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: AI Reviewer
-        uses: anc95/Gemini-CodeReview@main # Action que orquestra a revisão
+        uses: anc95/Gemini-Code-Review@main # Action que orquestra a revisão
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.AI_API_KEY }} # Google Gemini API Key
