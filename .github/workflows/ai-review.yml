@@ -22,6 +22,7 @@ jobs:
         uses: legiaquan/code-review-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
           provider: 'gemini'
           api_key: ${{ secrets.GEMINI_API_KEY }}
           LANGUAGE: Portuguese
