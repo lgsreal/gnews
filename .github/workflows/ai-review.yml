@@ -1,4 +1,4 @@
-name: AI Code Review
+name: Gemini AI Code Review
 
 on:
   pull_request:
@@ -9,24 +9,24 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # Necessário para comentar no PR
+      pull-requests: write
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: AI Reviewer
-        uses: anc95/ChatGPT-CodeReview@main # Action que orquestra a revisão
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }} # Google Gemini API Key
-          LANGUAGE: Portuguese
-          MODEL: gemini-2.0-flash # Google Gemini 2.0 Flash 
-          PROMPT: |
-            Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
-            Analise o DIFF deste Pull Request buscando:
+      - name: Gemini Code Reviewer
+        # Utilizando uma action compatível com modelos Google
+        uses: google-gemini/gemini-review-action@v1 
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          model: 'gemini-2.0-flash'
+          system_instruction: |
+            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
+            Analise o DIFF deste Pull Request e foque em:
             1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
             2. Code Smells e complexidade ciclomática desnecessária.
-            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
-            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado.
+            3. Aderência às melhores práticas de Java 21+ e Spring Boot 3.4.
+            4. Responda em Português com comentários técnicos e construtivos.
