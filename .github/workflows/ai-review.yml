@@ -20,12 +20,12 @@ jobs:
 
       - name: Gemini AI Code Review
         uses: legiaquan/code-review-action@main
-        with:
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           provider: 'gemini'
           api_key: AIzaSyCTX5Mqfx4cYkfZRKY0wMaBtbW0l5qq0l0
-          pr_number: ${{ github.event.pull_request.number }}
-          review_level: 'diff'
-          exclude_globs: '**/*.md,**/*.txt,**/package-lock.json'
+          LANGUAGE: Portuguese
+          MODEL: gemini-2.5-pro
           rules: |
             Responda sempre em Português.
             Aja como um Engenheiro de Segurança Sênior (DevSecOps).
