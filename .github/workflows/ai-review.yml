@@ -1,4 +1,4 @@
-name: AI Code Review
+name: AI Code Review (Gemini)
 
 on:
   pull_request:
@@ -9,24 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # Necessário para comentar no PR
+      pull-requests: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: AI Reviewer
-        uses: truongnh1992/gemini-ai-code-reviewer@main
+      - name: Gemini Code Review
+        uses: google-gemini/gemini-code-review-action@v1
         with:
+          # Aqui usamos a Secret que você criou
           gemini_api_key: ${{ secrets.AI_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          model: gemini-1.5-pro
-          extra_prompt: |
-            Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
-            Analise o DIFF deste Pull Request buscando:
-            1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
-            2. Code Smells e complexidade ciclomática desnecessária.
-            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
-            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado.
-
+          model: "gemini-2.0-flash"
+          # Opcional: Você pode customizar o sistema de instrução aqui
+          system_instruction: |
+            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
+            Analise o código buscando vulnerabilidades OWASP (SQL Injection), 
+            code smells e conformidade com Spring Boot 3.4.
+            Responda em Português.
