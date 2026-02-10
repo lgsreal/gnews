@@ -1,0 +1,18 @@
+name: AI Code Review (Debug)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  debug_models:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List Gemini Models
+        env:
+          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
+        run: |
+          echo "Listing models for v1..."
+          curl -s "https://generativelanguage.googleapis.com/v1/models?key=$GEMINI_API_KEY" | jq '.models[] | .name'
+          echo "Listing models for v1beta..."
+          curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY" | jq '.models[] | .name'
