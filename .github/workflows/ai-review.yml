@@ -20,9 +20,9 @@ jobs:
         uses: anc95/Gemini-CodeReview@main # Action que orquestra a revisão
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }} # Funciona com Gemini via proxy ou OpenAI nativo
+          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }} # Google Gemini API Key
           LANGUAGE: Portuguese
-          MODEL: gpt-4o # Ajuste para o modelo configurado
+          MODEL: gemini-2.0-flash # Google Gemini 2.0 Flash
           PROMPT: |
             Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
             Analise o DIFF deste Pull Request buscando:
