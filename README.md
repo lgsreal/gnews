@@ -24,6 +24,31 @@ O projeto inclui um cliente HTML simples para testar a API localmente.
 2.  **Cliente HTML**: Abra o arquivo [extras/news-site.html](extras/news-site.html) em seu navegador. A "API Key" de teste já está configurada (`test-api-key`).
 3.  **Swagger UI**: Alternativamente, acesse `http://localhost:8080/swagger-ui.html` para explorar e testar a API.
 
+## 🧩 Diagrama de Entidades
+
+```mermaid
+erDiagram
+    ARTICLE {
+        string id
+        string title
+        string description
+        string content
+        string url
+        string image
+        datetime publishedAt
+        string lang
+        string category
+    }
+
+    SOURCE {
+        string id
+        string name
+        string url
+        string country
+    }
+
+    SOURCE ||--o{ ARTICLE : "source"
+```
 ## � Endpoints Principais
 
 A API reproduz as seguintes rotas da GNews (V4):
