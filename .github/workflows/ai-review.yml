@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Gemini AI Code Review
-        uses: legiaquan/code-review-action@v1
+        uses: legiaquan/code-review-action@main
         with:
           provider: 'gemini'
           api_key: AIzaSyCTX5Mqfx4cYkfZRKY0wMaBtbW0l5qq0l0
