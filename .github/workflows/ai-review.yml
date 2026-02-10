@@ -21,12 +21,26 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Pega o diff
-          DIFF=$(git diff origin/${{ github.base_ref }}...HEAD | head -c 50000)
+          # Pega o diff entre a base e o commit atual do PR de forma mais robusta
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          
+          echo "Comparing $BASE_SHA with $HEAD_SHA"
+          
+          # Garante que temos a base
+          git fetch origin $BASE_SHA --depth=1
+          
+          DIFF=$(git diff $BASE_SHA $HEAD_SHA | head -c 50000)
           
           if [ -z "$DIFF" ]; then
-            echo "No changes found."
-            exit 0
+            echo "No changes found between $BASE_SHA and $HEAD_SHA."
+            # Tenta um diff simples se o acima falhar
+            DIFF=$(git diff HEAD~1 HEAD | head -c 50000)
+          fi
+          
+          if [ -z "$DIFF" ]; then
+             echo "Still no changes found. Exiting."
+             exit 0
           fi
 
           # Prepara o prompt
@@ -35,7 +49,7 @@ jobs:
           echo '{"contents": [{"parts": [{"text": ""}]}]}' > payload.json
           jq --arg txt "$PROMPT" '.contents[0].parts[0].text = $txt' payload.json > final_payload.json
 
-          # Chama a API do Gemini (v1 estável com -latest)
+          # Chama a API do Gemini
           RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY" \
             -H 'Content-Type: application/json' \
             -d @final_payload.json)
