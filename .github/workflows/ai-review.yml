@@ -22,7 +22,7 @@ jobs:
         with:
           gemini-key: ${{ secrets.AI_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          model: "gemini-1.5-pro"
+          model: "gemini-1.5-flash"
           prompt: |
             Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
             Analise o DIFF deste Pull Request buscando:
