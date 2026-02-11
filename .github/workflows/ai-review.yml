@@ -17,24 +17,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Gemini Code Reviewer
+        uses: sshnaidm/gemini-code-review-action@v1
         with:
-          python-version: '3.9'
-
-      - name: Install Dependencies
-        run: pip install google-generativeai PyGithub
-
-      - name: Run AI Reviewer
-        env:
-          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.number }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          # Se for execução manual, definir um PR fake ou pegar input (opcional, aqui foca no PR)
-          if [ -z "$PR_NUMBER" ]; then
-            echo "PR_NUMBER não detectado. Esta action deve rodar em um Pull Request."
-            exit 0
-          fi
-          python .github/scripts/ai_reviewer.py
+          gemini-key: ${{ secrets.AI_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          model: "gemini-pro"
+          prompt: |
+            Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
+            Analise o DIFF deste Pull Request buscando:
+            1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
+            2. Code Smells e complexidade ciclomática desnecessária.
+            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
+            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado.
