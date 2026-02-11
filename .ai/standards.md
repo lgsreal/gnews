@@ -1,7 +1,7 @@
 # Coding Standards
 
 ## General
-- **Java Version**: 25 (Minimum)
+- **Java Version**: 17 (Minimum)
 - **Code Style**: Clean code, readability > complex abstractions.
 - **Testing**: Desirable but not mandatory. If implementing, use JUnit 5.
 
