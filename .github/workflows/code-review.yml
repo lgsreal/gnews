@@ -12,6 +12,7 @@ jobs:
     if: |
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/gemini-review')
+
     steps:
       - name: PR Info
         run: |
@@ -37,5 +38,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
-          GEMINI_MODEL: gemini-2.5-pro # Optional, default is `gemini-2.5-flash`
+          GEMINI_MODEL: gemini-2.5-pro
           EXCLUDE: "*.md,*.txt,package-lock.json,*.yml,*.yaml"
