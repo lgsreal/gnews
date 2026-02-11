@@ -20,7 +20,7 @@ jobs:
         uses: anc95/ChatGPT-CodeReview@main # Action que orquestra a revisão
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.AI_API_KEY }} # Funciona com Gemini via proxy ou OpenAI nativo
+          OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # Funciona com Gemini via proxy ou OpenAI nativo
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai/
           LANGUAGE: Portuguese
           MODEL: gemini-2.0-flash # Ajuste para o modelo configurado
