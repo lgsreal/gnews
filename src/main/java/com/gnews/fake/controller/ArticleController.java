@@ -51,4 +51,8 @@ public class ArticleController {
             @Parameter(description = "API Key") @RequestParam String apikey) {
         return articleService.search(q, lang, country, sortby, from, to, page, max);
     }
+
+    public void findByTitle(String userInput) {
+        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
+    }
 }
