@@ -14,14 +14,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 @Service
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final JdbcTemplate jdbcTemplate;
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public ArticleService(ArticleRepository articleRepository) {
+    public ArticleService(ArticleRepository articleRepository, JdbcTemplate jdbcTemplate) {
         this.articleRepository = articleRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public ArticlesResponse getTopHeadlines(String category, String lang, String country, String q, int page, int max) {
@@ -121,5 +128,30 @@ public class ArticleService {
                         article.source().name(),
                         article.source().url(),
                         article.source().country()));
+    }
+
+    // VULNERABLE METHOD: SQL Injection intended for demonstration
+    public List<Article> findByTitle(String userInput) {
+        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
+        return jdbcTemplate.query(query, new ArticleRowMapper());
+    }
+
+    private static class ArticleRowMapper implements RowMapper<Article> {
+        @Override
+        public Article mapRow(ResultSet rs, int rowNum) throws SQLException {
+            // Simplified mapping for demo purposes - fields might be null/empty
+            return new Article(
+                rs.getString("id"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getString("content"),
+                rs.getString("url"),
+                rs.getString("image"),
+                LocalDateTime.now(), // Mock date
+                rs.getString("lang"),
+                "general",
+                null // mock source
+            );
+        }
     }
 }
