@@ -3,6 +3,7 @@ name: AI Code Review
 on:
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch: # Permite execução manual
 
 jobs:
   review:
