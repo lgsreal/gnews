@@ -17,12 +17,12 @@ jobs:
           fetch-depth: 0
 
       - name: AI Reviewer
-        uses: anc95/ChatGPT-CodeReview@main # Action que orquestra a revisão
+        uses: truongnh1992/gemini-ai-code-reviewer@main # Action que orquestra a revisão
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.AI_API_KEY }} # Funciona com Gemini via proxy ou OpenAI nativo
           LANGUAGE: Portuguese
-          MODEL: gpt-4o # Ajuste para o modelo configurado
+          MODEL: gemini-1.5-pro # Ajuste para o modelo configurado
           PROMPT: |
             Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
             Analise o DIFF deste Pull Request buscando:
