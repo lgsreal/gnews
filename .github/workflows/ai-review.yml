@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -20,15 +21,26 @@ jobs:
         uses: anc95/ChatGPT-CodeReview@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
+
+          # ATENÇÃO: Aqui você deve colocar sua chave da OpenAI (começa com sk-...)
+          # Crie uma nova Secret no GitHub chamada OPENAI_REAL_KEY
+          OPENAI_API_KEY: ${{ secrets.OPENAI_REAL_KEY }}
+
+          # IMPORTANTE: A linha OPENAI_API_ENDPOINT foi REMOVIDA.
+          # (Ao remover, ele conecta automaticamente na OpenAI oficial)
+
           LANGUAGE: Portuguese
-          MODEL: gemini-1.5-flash
-          ignore_patterns: package-lock.json,yarn.lock,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle
+
+          # Modelo oficial da OpenAI
+          MODEL: gpt-3.5-turbo
+
+          # Cuidado: O GPT-3.5 é pago. Mantenha os ignores para não gastar créditos à toa.
+          ignore_patterns: package-lock.json,yarn.lock,pnpm-lock.yaml,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle
+
           PROMPT: |
-            Aja como um Engenheiro de Seguranca Senior (DevSecOps).
+            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
             Analise o DIFF deste Pull Request buscando:
             1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
-            2. Code Smells e complexidade ciclomatica desnecessaria.
-            3. Aderencia as melhores praticas de Java 25 e Spring Boot 3.4.
-            4. Responda com comentarios tecnicos e construtivos diretamente nas linhas do codigo afetado.
+            2. Code Smells e complexidade ciclomática desnecessária.
+            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
+            4. Responda com comentários técnicos e construtivos diretamente nas linhas do código afetado.
