@@ -21,20 +21,9 @@ jobs:
         uses: anc95/ChatGPT-CodeReview@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-          # ATENÇÃO: Aqui você deve colocar sua chave da OpenAI (começa com sk-...)
-          # Crie uma nova Secret no GitHub chamada OPENAI_REAL_KEY
           OPENAI_API_KEY: ${{ secrets.OPENAI_REAL_KEY }}
-
-          # IMPORTANTE: A linha OPENAI_API_ENDPOINT foi REMOVIDA.
-          # (Ao remover, ele conecta automaticamente na OpenAI oficial)
-
           LANGUAGE: Portuguese
-
-          # Modelo oficial da OpenAI
           MODEL: gpt-3.5-turbo
-
-          # Cuidado: O GPT-3.5 é pago. Mantenha os ignores para não gastar créditos à toa.
           ignore_patterns: package-lock.json,yarn.lock,pnpm-lock.yaml,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle
 
           PROMPT: |
