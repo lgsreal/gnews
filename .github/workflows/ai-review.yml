@@ -10,7 +10,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -22,27 +21,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-          # --- CORREÇÃO DO ERRO 404 ---
-          # Adicionei a barra '/' no final. NÃO REMOVA.
-          OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai/
-
+          OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
           LANGUAGE: Portuguese
-
-          # Modelo robusto contra o erro 429
-          MODEL: gemini-1.5-flash
-
-          # Tokens controlados para evitar timeout
-          MAX_TOKENS: 2500
-
-          # --- FILTRO CRÍTICO (ERRO 429) ---
-          # Mantive seus filtros. Eles são essenciais.
-          ignore_patterns: package-lock.json,yarn.lock,pnpm-lock.yaml,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle,*.md
-
+          MODEL: gemini-2.0-flash
           PROMPT: |
-            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
-            Analise o DIFF buscando:
-            1. Vulnerabilidades OWASP Top 10.
-            2. Code Smells graves.
-            3. Aderência a Java 21+ e Spring Boot 3.x.
-            Seja conciso.
+            Aja como um Engenheiro de Seguranca Senior (DevSecOps).
+            Analise o DIFF deste Pull Request buscando:
+            1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
+            2. Code Smells e complexidade ciclomatica desnecessaria.
+            3. Aderencia as melhores praticas de Java 25 e Spring Boot 3.4.
+            4. Responda com comentarios tecnicos e construtivos diretamente nas linhas do codigo afetado.
