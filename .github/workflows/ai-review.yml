@@ -21,20 +21,11 @@ jobs:
         uses: anc95/ChatGPT-CodeReview@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-          # Chave do proxy (não é a key direta do Google)
           OPENAI_API_KEY: ${{ secrets.AI_API_KEY }}
-
-          # URL do proxy compatível com OpenAI
-          OPENAI_BASE_URL: https://SEU_PROXY_AQUI/v1
-
+          OPENAI_BASE_URL: https://generativelanguage.googleapis.com/v1beta/openai/
           LANGUAGE: Portuguese
-
-          # Modelo Gemini
-          MODEL: gemini-2.0-flash
-
-          # Opcional, mas recomendado para Gemini Flash
-          MAX_TOKENS: 2048
+          MODEL: gemini-2.5-flash
+          MAX_TOKENS: 4096
 
           PROMPT: |
             Aja como um Engenheiro de Segurança Sênior (DevSecOps).
