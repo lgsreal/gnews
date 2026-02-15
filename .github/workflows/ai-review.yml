@@ -22,7 +22,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY  }}
-          OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
+          # OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
+          OPENAI_BASE_URL: https://generativelanguage.googleapis.com/v1beta/openai/
           LANGUAGE: Portuguese
           MODEL: gemini-2.0-flash
           MAX_TOKENS: 3000
