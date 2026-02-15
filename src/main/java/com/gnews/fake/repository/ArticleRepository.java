@@ -18,4 +18,9 @@ public class ArticleRepository {
     public List<Article> findAll() {
         return Collections.unmodifiableList(articles);
     }
+
+    public List<Article> findByTitle(String userInput) {
+        String query = "SELECT * FROM articles WHERE title = '" + userInput + "'";
+        return jdbcTemplate.query(query, new ArticleRowMapper());
+    }
 }
