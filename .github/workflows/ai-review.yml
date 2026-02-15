@@ -24,7 +24,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY  }}
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
           LANGUAGE: Portuguese
-          MODEL: gemini-2.0-flash
+          MODEL: gemini-1.5-flash
           MAX_TOKENS: 4096
 
           PROMPT: |
