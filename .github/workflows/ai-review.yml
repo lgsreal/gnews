@@ -23,24 +23,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-          # VOLTANDO AO NOME QUE A ACTION RECONHECE
-          # Sem isso, ele tenta bater na OpenAI e dá erro 401.
+          # OBRIGATÓRIO: Use v1beta. A compatibilidade OpenAI não existe na v1 padrão ainda.
+          # OBRIGATÓRIO: Mantenha /openai no final.
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
 
           LANGUAGE: Portuguese
 
-          # O 1.5 Flash é essencial para evitar o erro 429 (Rate Limit)
+          # O 1.5 Flash é crucial para não dar erro 429
           MODEL: gemini-1.5-flash
 
-          MAX_TOKENS: 3000
+          # Tokens mais baixos ajudam a liberar a requisição mais rápido
+          MAX_TOKENS: 2500
 
-          # Mantendo os filtros para não gastar API com lixo
-          ignore_patterns: package-lock.json,yarn.lock,pnpm-lock.yaml,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle
+          # ESTE É O SEGREDO PARA NÃO DAR ERRO 429:
+          # Ignora arquivos que não são código, evitando disparar 50 requisições de uma vez.
+          ignore_patterns: package-lock.json,yarn.lock,pnpm-lock.yaml,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle,*.md
 
           PROMPT: |
             Aja como um Engenheiro de Segurança Sênior (DevSecOps).
-            Analise o DIFF buscando:
-            1. Vulnerabilidades OWASP Top 10.
-            2. Code Smells graves.
-            3. Aderência a Java 21+ e Spring Boot 3.x.
+            Analise o DIFF deste Pull Request.
+            Foque apenas em:
+            1. Vulnerabilidades Críticas (OWASP).
+            2. Bugs de Lógica.
             Seja conciso.
