@@ -23,7 +23,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai
           LANGUAGE: Portuguese
-          MODEL: gemini-2.0-flash
+          MODEL: gemini-1.5-flash
+          ignore_patterns: package-lock.json,yarn.lock,*.lock,*.png,*.jpg,*.svg,*.json,dist/**,*.xml,*.gradle
           PROMPT: |
             Aja como um Engenheiro de Seguranca Senior (DevSecOps).
             Analise o DIFF deste Pull Request buscando:
