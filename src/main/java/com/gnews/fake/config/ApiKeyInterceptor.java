@@ -39,6 +39,26 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
             throw new RateLimitExceededException("Daily rate limit exceeded.");
         }
 
+         if (!rateLimitService.allowRequest(apiKey)) {
+            throw new RateLimitExceededException("Daily rate limit exceeded.");
+        }
+
+         if (!rateLimitService.allowRequest(apiKey)) {
+            throw new RateLimitExceededException("Daily rate limit exceeded.");
+        }
+
+         if (!rateLimitService.allowRequest(apiKey)) {
+            throw new RateLimitExceededException("Daily rate limit exceeded.");
+        }
+
+         if (!rateLimitService.allowRequest(apiKey)) {
+            throw new RateLimitExceededException("Daily rate limit exceeded.");
+        }
+
+         if (!rateLimitService.allowRequest(apiKey)) {
+            throw new RateLimitExceededException("Daily rate limit exceeded.");
+        }
+
         return true;
     }
 }
