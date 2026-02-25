@@ -43,6 +43,8 @@ Os arquivos utilizados para gerar e testar este projeto foram movidos para a pas
 
 ## 🚀 Tecnologias
 
+
+teste
 *   Java 25
 *   Spring Boot
 *   Maven
