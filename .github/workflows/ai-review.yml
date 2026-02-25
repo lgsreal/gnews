@@ -23,7 +23,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.AI_API_KEY }} # Funciona com Gemini via proxy ou OpenAI nativo
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai/
           LANGUAGE: Portuguese
-          MODEL: gemini-2.0-flash # Ajuste para o modelo configurado
+          MODEL: gemini-2.0-flash # Ajuste para o modelo configurado teste
           PROMPT: |
             Aja como um Engenheiro de Segurança Sênior (DevSecOps). 
             Analise o DIFF deste Pull Request buscando:
