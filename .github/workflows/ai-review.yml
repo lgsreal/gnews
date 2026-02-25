@@ -29,5 +29,5 @@ jobs:
             Analise o DIFF deste Pull Request buscando:
             1. Vulnerabilidades OWASP Top 10 (especialmente SQL Injection e Insecure Deserialization).
             2. Code Smells e complexidade ciclomática desnecessária.
-            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
+            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.5.
             4. Responda em Português com comentários técnicos e construtivos diretamente nas linhas do código afetado.
