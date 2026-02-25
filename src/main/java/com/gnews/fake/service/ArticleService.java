@@ -24,15 +24,6 @@ public class ArticleService {
         this.articleRepository = articleRepository;
     }
 
-    // VULNERABILIDADE INTENCIONAL - SQL Injection (OWASP A03:2021)
-    // Input do usuário concatenado diretamente na query sem sanitização
-    public List<Article> findByTitle(String userInput) {
-        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
-        return articleRepository.findAll().stream()
-                .filter(a -> a.title().equals(query))
-                .toList();
-    }
-
     public ArticlesResponse getTopHeadlines(String category, String lang, String country, String q, int page, int max) {
         Predicate<Article> predicate = article -> true;
 
