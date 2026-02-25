@@ -5,8 +5,8 @@ import com.gnews.fake.dto.ArticleDto;
 import com.gnews.fake.dto.ArticlesResponse;
 import com.gnews.fake.dto.SourceDto;
 import com.gnews.fake.repository.ArticleRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -18,20 +18,10 @@ import java.util.function.Predicate;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final JdbcTemplate jdbcTemplate;
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public ArticleService(ArticleRepository articleRepository, JdbcTemplate jdbcTemplate) {
+    public ArticleService(ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    // VULNERABILIDADE INTENCIONAL: SQL Injection por concatenação direta de input
-    // do usuário
-    // NUNCA use em produção! Use PreparedStatements ou named parameters.
-    public List<String> findByTitle(String userInput) {
-        String query = "SELECT title FROM articles WHERE title = '" + userInput + "'";
-        return jdbcTemplate.query(query, (rs, rowNum) -> rs.getString("title"));
     }
 
     public ArticlesResponse getTopHeadlines(String category, String lang, String country, String q, int page, int max) {
