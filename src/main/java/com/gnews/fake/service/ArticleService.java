@@ -17,6 +17,14 @@ import java.util.function.Predicate;
 @Service
 public class ArticleService {
 
+    // CRI-001: HARDCODED SECRET (Action Required)
+    private static final String AWS_SECRET_KEY = "AKIA1234567890ABCDEF";
+
+    // CRI-002: COMMAND INJECTION (Action Required/Critical)
+    public void executeSystemCommand(String userCommand) throws java.io.IOException {
+        Runtime.getRuntime().exec(userCommand); // OWASP Top 10 Injection
+    }
+
     private final ArticleRepository articleRepository;
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
