@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import com.gnews.fake.dto.ArticleDto;
 
 @RestController
 @RequestMapping("/api/v4")
@@ -18,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ArticleController {
 
     private final ArticleService articleService;
+
+    // VIOLATION: Optional in field (Bad Practice & Standards Violation)
+    private Optional<String> lastSearchQuery = Optional.empty();
 
     public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
@@ -50,5 +57,64 @@ public class ArticleController {
             @Parameter(description = "To date (ISO 8601)") @RequestParam(required = false) String to,
             @Parameter(description = "API Key") @RequestParam String apikey) {
         return articleService.search(q, lang, country, sortby, from, to, page, max);
+    }
+
+    // VIOLATION: High Cyclomatic Complexity, Manual Loops (No Streams), Logic in
+    // Controller
+    @GetMapping("/analyze")
+    @Operation(summary = "Analyze articles complexity", description = "Analyzes articles with high complexity logic")
+    public List<String> analyzeArticles(@RequestParam(required = false) List<String> keywords) {
+        // Fetch all (mock)
+        List<ArticleDto> allArticles = articleService.getTopHeadlines(null, null, null, null, 1, 100).articles();
+        List<String> results = new ArrayList<>();
+
+        if (keywords == null) {
+            keywords = new ArrayList<>();
+            keywords.add("news");
+        }
+
+        // Manual Loops instead of Streams (Standards Violation)
+        for (int i = 0; i < allArticles.size(); i++) {
+            ArticleDto a1 = allArticles.get(i);
+            for (int j = 0; j < keywords.size(); j++) {
+                String k = keywords.get(j);
+                if (a1.title() != null) {
+                    if (a1.title().toLowerCase().contains(k.toLowerCase())) {
+                        boolean alreadyExists = false;
+                        // Manual check for existence
+                        for (int m = 0; m < results.size(); m++) {
+                            if (results.get(m).equals(a1.title())) {
+                                alreadyExists = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyExists) {
+                            if (a1.description() != null) {
+                                if (a1.description().length() > 5) { // Arbitrary logic
+                                    // Deeply nested if
+                                    if (a1.url() != null && !a1.url().isEmpty()) {
+                                        results.add(a1.title());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return results;
+    }
+
+    // VIOLATION: DTO as Class instead of Record (Standards Violation)
+    public static class BadDto {
+        public String query;
+    }
+
+    @GetMapping("/bad-dto")
+    public BadDto getBadDto() {
+        BadDto d = new BadDto();
+        d.query = "validation";
+        return d;
     }
 }
