@@ -5,6 +5,8 @@ import com.gnews.fake.dto.ArticleDto;
 import com.gnews.fake.dto.ArticlesResponse;
 import com.gnews.fake.dto.SourceDto;
 import com.gnews.fake.repository.ArticleRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,6 +21,9 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ArticleService(ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
@@ -45,42 +50,59 @@ public class ArticleService {
         return fetchAndMap(predicate, Comparator.comparing(Article::publishedAt).reversed(), page, max);
     }
 
+    /**
+     * Refatorado para empurrar a filtragem para o banco em vez de carregar tudo em
+     * memória. Melhora bastante a performance com volumes maiores de artigos.
+     */
+    @SuppressWarnings("unchecked")
     public ArticlesResponse search(String q, String lang, String country, String sortBy,
             String from, String to, int page, int max) {
-        Predicate<Article> predicate = article -> true;
 
-        // In search, q is technically required by GNews, but we will handle validation
-        // in controller.
+        StringBuilder where = new StringBuilder("1 = 1");
+
         if (q != null && !q.isBlank()) {
             String query = q.toLowerCase();
-            predicate = predicate.and(a -> a.title().toLowerCase().contains(query) ||
-                    a.description().toLowerCase().contains(query));
+            where.append(" AND (LOWER(a.title) LIKE '%").append(query)
+                    .append("%' OR LOWER(a.description) LIKE '%").append(query).append("%')");
         }
         if (lang != null && !lang.isBlank()) {
-            predicate = predicate.and(a -> a.lang().equalsIgnoreCase(lang));
+            where.append(" AND LOWER(a.lang) = '").append(lang.toLowerCase()).append("'");
         }
         if (country != null && !country.isBlank()) {
-            predicate = predicate.and(a -> a.source().country().equalsIgnoreCase(country));
+            where.append(" AND LOWER(a.country) = '").append(country.toLowerCase()).append("'");
         }
-        // Date filtering (simplified parsing)
         if (from != null && !from.isBlank()) {
-            LocalDateTime fromDate = LocalDateTime.parse(from, DateTimeFormatter.ISO_DATE_TIME);
-            predicate = predicate.and(a -> a.publishedAt().isAfter(fromDate));
+            where.append(" AND a.published_at > '").append(from).append("'");
         }
         if (to != null && !to.isBlank()) {
-            LocalDateTime toDate = LocalDateTime.parse(to, DateTimeFormatter.ISO_DATE_TIME);
-            predicate = predicate.and(a -> a.publishedAt().isBefore(toDate));
+            where.append(" AND a.published_at < '").append(to).append("'");
         }
 
-        Comparator<Article> comparator = Comparator.comparing(Article::publishedAt).reversed();
-        if ("relevance".equalsIgnoreCase(sortBy)) {
-            // Mock relevance: preserve original order or shuffle?
-            // Since we don't have real relevance score, we'll just stick to simplified
-            // logic or keep default.
-            // Let's just default to date desc for predictability unless needed.
+        String orderBy = "a.published_at DESC";
+        if (sortBy != null && !sortBy.isBlank() && !"relevance".equalsIgnoreCase(sortBy)) {
+            orderBy = sortBy;
         }
 
-        return fetchAndMap(predicate, comparator, page, max);
+        int pageNum = Math.max(1, page);
+        int pageSize = Math.max(1, Math.min(100, max));
+        int skip = (pageNum - 1) * pageSize;
+
+        String sql = "SELECT * FROM articles a WHERE " + where
+                + " ORDER BY " + orderBy
+                + " LIMIT " + pageSize + " OFFSET " + skip;
+
+        List<Article> results = entityManager
+                .createNativeQuery(sql, Article.class)
+                .getResultList();
+
+        String countSql = "SELECT COUNT(*) FROM articles a WHERE " + where;
+        Number total = (Number) entityManager.createNativeQuery(countSql).getSingleResult();
+
+        List<ArticleDto> resultDtos = results.stream()
+                .map(this::mapToDto)
+                .toList();
+
+        return new ArticlesResponse(total.intValue(), resultDtos);
     }
 
     private ArticlesResponse fetchAndMap(Predicate<Article> predicate, Comparator<Article> comparator, int page,
@@ -91,9 +113,8 @@ public class ArticleService {
                 .toList();
 
         int total = filtered.size();
-        // Validation for pagination
         int pageNum = Math.max(1, page);
-        int pageSize = Math.max(1, Math.min(100, max)); // cap max at 100
+        int pageSize = Math.max(1, Math.min(100, max));
 
         int skip = (pageNum - 1) * pageSize;
 
