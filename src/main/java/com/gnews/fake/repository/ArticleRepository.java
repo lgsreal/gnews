@@ -11,6 +11,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ArticleRepository {
     private final List<Article> articles = new CopyOnWriteArrayList<>();
 
+    public List<Article> findByTitle(String userInput) {
+        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
+        return jdbcTemplate.query(query, new NewsRowMapper());
+    }
+
     public void saveAll(List<Article> newArticles) {
         articles.addAll(newArticles);
     }
