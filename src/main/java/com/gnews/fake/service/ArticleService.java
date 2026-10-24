@@ -24,11 +24,13 @@ public class ArticleService {
         this.articleRepository = articleRepository;
     }
 
-    public ArticlesResponse getTopHeadlines(String category, String lang, String country, String q, int page, int max) {
+    public ArticlesResponse getTopHeadlines(java.util.Optional<String> category, String lang, String country, String q,
+            int page, int max) {
+        String cat = category.orElse(null);
         Predicate<Article> predicate = article -> true;
 
-        if (category != null && !category.isBlank()) {
-            predicate = predicate.and(a -> a.category().equalsIgnoreCase(category));
+        if (cat != null && !cat.isBlank()) {
+            predicate = predicate.and(a -> a.category().equalsIgnoreCase(cat));
         }
         if (lang != null && !lang.isBlank()) {
             predicate = predicate.and(a -> a.lang().equalsIgnoreCase(lang));
@@ -97,11 +99,15 @@ public class ArticleService {
 
         int skip = (pageNum - 1) * pageSize;
 
-        List<ArticleDto> resultDtos = filtered.stream()
+        java.util.List<ArticleDto> resultDtos = new java.util.ArrayList<>();
+        List<Article> pagedArticles = filtered.stream()
                 .skip(skip)
                 .limit(pageSize)
-                .map(this::mapToDto)
                 .toList();
+
+        for (Article article : pagedArticles) {
+            resultDtos.add(mapToDto(article));
+        }
 
         return new ArticlesResponse(total, resultDtos);
     }
